@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waga</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 24px 16px;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+        label {
+            display: block;
+            margin-top: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        input {
+            width: 100%;
+            padding: 14px;
+            font-size: 20px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            margin-top: 6px;
+            -webkit-appearance: none;
+        }
+        input:focus {
+            outline: none;
+            border-color: #0066cc;
+        }
+        #result {
+            margin-top: 24px;
+            font-size: 22px;
+            font-weight: bold;
+            min-height: 1.5em;
+        }
+    </style>
+</head>
+<body>
+    <label for="startWeight">Waga startowa</label>
+    <input type="text" id="startWeight" inputmode="decimal" placeholder="np. 3500" autofocus>
+
+    <label for="currentWeight">Waga obecna</label>
+    <input type="text" id="currentWeight" inputmode="decimal" placeholder="np. 3250">
+
+    <div id="result"></div>
+
+    <script>
+        function calculate() {
+            const startVal = document.getElementById('startWeight').value.trim();
+            const currentVal = document.getElementById('currentWeight').value.trim();
+            const resultElement = document.getElementById('result');
+
+            if (!startVal || !currentVal) {
+                resultElement.innerText = '';
+                return;
+            }
+
+            const start = parseFloat(startVal.replace(',', '.'));
+            const current = parseFloat(currentVal.replace(',', '.'));
+
+            if (isNaN(start) || isNaN(current)) {
+                resultElement.innerText = 'Wprowadź poprawne liczby.';
+                return;
+            }
+
+            if (start <= 0) {
+                resultElement.innerText = 'Waga startowa musi być większa od 0.';
+                return;
+            }
+
+            const diffPercent = ((start - current) / start) * 100;
+
+            if (diffPercent >= 0) {
+                resultElement.innerText = `Waga zmalała o ${diffPercent.toFixed(2)}%`;
+            } else {
+                resultElement.innerText = `Waga wzrosła o ${Math.abs(diffPercent).toFixed(2)}%`;
+            }
+        }
+
+        document.getElementById('startWeight').addEventListener('input', calculate);
+        document.getElementById('currentWeight').addEventListener('input', calculate);
+    </script>
+</body>
+</html>
