@@ -22,18 +22,50 @@
             font-weight: 600;
             color: #333;
         }
-        input {
+        .input-wrapper {
+            position: relative;
+            margin-top: 6px;
+        }
+        .input-wrapper input {
             width: 100%;
             padding: 14px;
+            padding-right: 44px;
             font-size: 20px;
             border: 2px solid #ccc;
             border-radius: 8px;
-            margin-top: 6px;
             -webkit-appearance: none;
         }
-        input:focus {
+        .input-wrapper input:focus {
             outline: none;
             border-color: #0066cc;
+        }
+        .clear-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: #e0e0e0;
+            color: #666;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            user-select: none;
+            transition: background 0.15s, color 0.15s;
+        }
+        .clear-btn:hover {
+            background: #ccc;
+            color: #222;
+        }
+        .clear-btn.visible {
+            display: flex;
         }
         #result {
             margin-top: 24px;
@@ -45,21 +77,55 @@
 </head>
 <body>
     <label for="startWeight">Waga startowa</label>
-    <input type="text" id="startWeight" inputmode="decimal" placeholder="np. 3500" autofocus>
+    <div class="input-wrapper">
+        <input type="text" id="startWeight" inputmode="decimal" placeholder="np. 3500" autofocus>
+        <button type="button" class="clear-btn" id="clearStart" aria-label="Wyczyść wagę startową">&times;</button>
+    </div>
 
     <label for="currentWeight">Waga obecna</label>
-    <input type="text" id="currentWeight" inputmode="decimal" placeholder="np. 3250">
+    <div class="input-wrapper">
+        <input type="text" id="currentWeight" inputmode="decimal" placeholder="np. 3250">
+        <button type="button" class="clear-btn" id="clearCurrent" aria-label="Wyczyść wagę obecną">&times;</button>
+    </div>
 
-    <div id="result"></div>
+    <div id="result">Waga zmalała o 0.00%</div>
 
     <script>
+        const startInput = document.getElementById('startWeight');
+        const currentInput = document.getElementById('currentWeight');
+        const clearStartBtn = document.getElementById('clearStart');
+        const clearCurrentBtn = document.getElementById('clearCurrent');
+        const resultElement = document.getElementById('result');
+
+        function updateClearBtn(input, btn) {
+            if (input.value.length > 0) {
+                btn.classList.add('visible');
+            } else {
+                btn.classList.remove('visible');
+            }
+        }
+
+        function setupClearButton(input, btn) {
+            btn.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+            });
+            btn.addEventListener('click', () => {
+                input.value = '';
+                updateClearBtn(input, btn);
+                calculate();
+                input.focus();
+            });
+        }
+
+        setupClearButton(startInput, clearStartBtn);
+        setupClearButton(currentInput, clearCurrentBtn);
+
         function calculate() {
-            const startVal = document.getElementById('startWeight').value.trim();
-            const currentVal = document.getElementById('currentWeight').value.trim();
-            const resultElement = document.getElementById('result');
+            const startVal = startInput.value.trim();
+            const currentVal = currentInput.value.trim();
 
             if (!startVal || !currentVal) {
-                resultElement.innerText = '';
+                resultElement.innerText = 'Waga zmalała o 0.00%';
                 return;
             }
 
@@ -85,8 +151,19 @@
             }
         }
 
-        document.getElementById('startWeight').addEventListener('input', calculate);
-        document.getElementById('currentWeight').addEventListener('input', calculate);
+        startInput.addEventListener('input', () => {
+            updateClearBtn(startInput, clearStartBtn);
+            calculate();
+        });
+
+        currentInput.addEventListener('input', () => {
+            updateClearBtn(currentInput, clearCurrentBtn);
+            calculate();
+        });
+
+        updateClearBtn(startInput, clearStartBtn);
+        updateClearBtn(currentInput, clearCurrentBtn);
+        calculate();
     </script>
 </body>
 </html>
