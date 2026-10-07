@@ -22,103 +22,70 @@
             font-weight: 600;
             color: #333;
         }
-        .input-wrapper {
-            position: relative;
-            margin-top: 6px;
-        }
-        .input-wrapper input {
+        input {
             width: 100%;
             padding: 14px;
-            padding-right: 44px;
             font-size: 20px;
             border: 2px solid #ccc;
             border-radius: 8px;
+            margin-top: 6px;
             -webkit-appearance: none;
         }
-        .input-wrapper input:focus {
+        input:focus {
             outline: none;
             border-color: #0066cc;
-        }
-        .clear-btn {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 28px;
-            height: 28px;
-            border: none;
-            background: #e0e0e0;
-            color: #666;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 18px;
-            line-height: 1;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-            user-select: none;
-            transition: background 0.15s, color 0.15s;
-        }
-        .clear-btn:hover {
-            background: #ccc;
-            color: #222;
-        }
-        .clear-btn.visible {
-            display: flex;
         }
         #result {
             margin-top: 24px;
             font-size: 22px;
             font-weight: bold;
             min-height: 1.5em;
+            color: #16a34a;
+        }
+        .clear-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 16px;
+            padding: 10px 18px;
+            min-height: 44px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #555;
+            background: #f2f2f2;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            cursor: pointer;
+            -webkit-appearance: none;
+            transition: background 0.15s, color 0.15s, border-color 0.15s;
+        }
+        .clear-btn:hover {
+            background: #e4e4e4;
+            color: #111;
+            border-color: #bbb;
+        }
+        .clear-btn:active {
+            background: #d8d8d8;
         }
     </style>
 </head>
 <body>
     <label for="startWeight">Waga startowa</label>
-    <div class="input-wrapper">
-        <input type="text" id="startWeight" inputmode="decimal" placeholder="np. 3500" autofocus>
-        <button type="button" class="clear-btn" id="clearStart" aria-label="Wyczyść wagę startową">&times;</button>
-    </div>
+    <input type="text" id="startWeight" inputmode="decimal" placeholder="np. 3500" autofocus>
 
     <label for="currentWeight">Waga obecna</label>
-    <div class="input-wrapper">
-        <input type="text" id="currentWeight" inputmode="decimal" placeholder="np. 3250">
-        <button type="button" class="clear-btn" id="clearCurrent" aria-label="Wyczyść wagę obecną">&times;</button>
-    </div>
+    <input type="text" id="currentWeight" inputmode="decimal" placeholder="np. 3250">
 
     <div id="result">Waga zmalała o 0.00%</div>
+
+    <button type="button" id="clearBtn" class="clear-btn" aria-label="Wyczyść oba pola">✕ Wyczyść</button>
 
     <script>
         const startInput = document.getElementById('startWeight');
         const currentInput = document.getElementById('currentWeight');
-        const clearStartBtn = document.getElementById('clearStart');
-        const clearCurrentBtn = document.getElementById('clearCurrent');
+        const clearBtn = document.getElementById('clearBtn');
         const resultElement = document.getElementById('result');
-
-        function updateClearBtn(input, btn) {
-            if (input.value.length > 0) {
-                btn.classList.add('visible');
-            } else {
-                btn.classList.remove('visible');
-            }
-        }
-
-        function setupClearButton(input, btn) {
-            btn.addEventListener('pointerdown', (e) => {
-                e.preventDefault();
-            });
-            btn.addEventListener('click', () => {
-                input.value = '';
-                updateClearBtn(input, btn);
-                calculate();
-                input.focus();
-            });
-        }
-
-        setupClearButton(startInput, clearStartBtn);
-        setupClearButton(currentInput, clearCurrentBtn);
 
         function calculate() {
             const startVal = startInput.value.trim();
@@ -126,6 +93,7 @@
 
             if (!startVal || !currentVal) {
                 resultElement.innerText = 'Waga zmalała o 0.00%';
+                resultElement.style.color = '#16a34a';
                 return;
             }
 
@@ -134,11 +102,13 @@
 
             if (isNaN(start) || isNaN(current)) {
                 resultElement.innerText = 'Wprowadź poprawne liczby.';
+                resultElement.style.color = '#dc2626';
                 return;
             }
 
             if (start <= 0) {
                 resultElement.innerText = 'Waga startowa musi być większa od 0.';
+                resultElement.style.color = '#dc2626';
                 return;
             }
 
@@ -149,20 +119,24 @@
             } else {
                 resultElement.innerText = `Waga wzrosła o ${Math.abs(diffPercent).toFixed(2)}%`;
             }
+
+            if (diffPercent <= 10) {
+                resultElement.style.color = '#16a34a';
+            } else {
+                resultElement.style.color = '#dc2626';
+            }
         }
 
-        startInput.addEventListener('input', () => {
-            updateClearBtn(startInput, clearStartBtn);
+        clearBtn.addEventListener('click', () => {
+            startInput.value = '';
+            currentInput.value = '';
             calculate();
+            startInput.focus();
         });
 
-        currentInput.addEventListener('input', () => {
-            updateClearBtn(currentInput, clearCurrentBtn);
-            calculate();
-        });
+        startInput.addEventListener('input', calculate);
+        currentInput.addEventListener('input', calculate);
 
-        updateClearBtn(startInput, clearStartBtn);
-        updateClearBtn(currentInput, clearCurrentBtn);
         calculate();
     </script>
 </body>
